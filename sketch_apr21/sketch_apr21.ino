@@ -3,14 +3,19 @@
 #include <avr/sleep.h>          // library for sleep
 #include <avr/power.h>          // library for power control
 
+#include <SD.h>                 //library for SD card module
+#include <SPI.h>                //library for SPI communication
+
 unsigned int Pm25 = 0;
 unsigned int Pm10 = 0;
 
 // how many times remain to sleep before wake up
 int nbr_remaining; 
 
+//the data file which data gets logged in
+File myFile;
+
 // pin on which a led is attached on the board
-#define led 13
 
 // interrupt raised by the watchdog firing
 // when the watchdog fires during sleep, this function will be executed
@@ -145,29 +150,70 @@ void ProcessSerialData()
    } 
 }
 
+void writeData(String data){
+
+  myFile = SD.open("data.txt", FILE_WRITE);
+  
+  // if the file opened okay, write to it:
+  if (myFile) {
+    Serial.println(data);
+    myFile.println("Data inserted : " +  data);
+    // close the file:
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+
+  // re-open the file for reading:
+  myFile = SD.open("data.txt");
+  if (myFile) {
+    Serial.println("data.txt:");
+
+    // read from the file until there's nothing else in it:
+    while (myFile.available()) {
+      Serial.write(myFile.read());
+    }
+    // close the file:
+    myFile.close();
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+  
+}
+
 void setup(){
   Serial.begin(9600, SERIAL_8N1);
+
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
+
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
+
+
+  
+  
   Pm25=0;
     Pm10=0;
     Display();
-  // use led 13 and put it in low mode
-  pinMode(led, OUTPUT);
-  digitalWrite(led, LOW);
   
   delay(1000);
   
   // configure the watchdog
   configure_wdt();
 
-  // blink twice
-  digitalWrite(led, HIGH);   
-  delay(500);               
-  digitalWrite(led, LOW);   
-  delay(500); 
-  digitalWrite(led, HIGH);   
-  delay(500);               
-  digitalWrite(led, LOW);   
-  delay(500); 
+
+  
 
 }
 
@@ -200,21 +246,29 @@ void loop(){
 
   // usefull stuff should be done here before next long sleep
   // blink three times
-  ProcessSerialData();
-  Display();
-  delay(5000);
+
+
+  int countTotal = 0;
+  int pm25Total = 0;
+  int pm10Total = 0;
   
-//  digitalWrite(led, HIGH);   
-//  delay(500);               
-//  digitalWrite(led, LOW);   
-//  delay(500); 
-//  digitalWrite(led, HIGH);   
-//  delay(500);               
-//  digitalWrite(led, LOW);   
-//  delay(500); 
-//  digitalWrite(led, HIGH);   
-//  delay(500);               
-//  digitalWrite(led, LOW);   
-//  delay(500); 
+  while (countTotal<10){
+      ProcessSerialData();
+      Display();
+      pm25Total += Pm25;
+      pm10Total += Pm10;
+      delay(1000);
+
+      if (!((Pm25 == 0) || (Pm10 == 0))){
+        countTotal++;
+        }
+    }
+
+  float pm25Ave = float(pm25Total)/(countTotal*10);
+  float pm10Ave = float(pm10Total)/(countTotal*10);
+
+  String dataToBeWritten = "PM2.5 : " + String(pm25Ave) + "   PM10 : " + String(pm10Ave);
+
+  writeData(dataToBeWritten);
 
 }
