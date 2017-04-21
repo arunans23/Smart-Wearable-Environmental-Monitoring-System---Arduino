@@ -28,53 +28,10 @@ void loop() {
 	delay(100);
   count++;
 
-// error = my_sds.read(&p25,&p10);
-// if (! error) {
-//  
-//    Serial.println("2");
-//    Serial.println("P2.5: "+String(p25));
-//    Serial.println("P10:  "+String(p10));
-//  }
-//  delay(100);
-//
-//  error = my_sds.read(&p25,&p10);
-//  if (! error) {
-//    
-//    Serial.println("3");
-//    Serial.println("P2.5: "+String(p25));
-//    Serial.println("P10:  "+String(p10));
-//  }
-//  delay(100);
-//
-//  error = my_sds.read(&p25,&p10);
-//  if (! error) {
-//    
-//    Serial.println("4");
-//    Serial.println("P2.5: "+String(p25));
-//    Serial.println("P10:  "+String(p10));
-//  }
-//  delay(100);
-//
-//  error = my_sds.read(&p25,&p10);
-//  if (! error) {
-//    
-//    Serial.println("5");
-//    Serial.println("P2.5: "+String(p25));
-//    Serial.println("P10:  "+String(p10));
-//  }
-//  delay(100);
-//
 // my_sds.sleep();
 // delay(5000);
 // my_sds.wakeup();
 // delay(1000);
-//
-// error = my_sds.read(&p25,&p10);
-//  if (! error) {
-//    
-//    Serial.println("6");
-//    Serial.println("P2.5: "+String(p25));
-//    Serial.println("P10:  "+String(p10));
-//  }
-//  delay(100);
+
 }
+

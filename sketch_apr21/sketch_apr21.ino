@@ -6,6 +6,7 @@
 #include <SD.h>                 //library for SD card module
 #include <SPI.h>                //library for SPI communication
 
+
 unsigned int Pm25 = 0;
 unsigned int Pm10 = 0;
 
@@ -14,6 +15,28 @@ int nbr_remaining;
 
 //the data file which data gets logged in
 File myFile;
+
+static const byte SLEEPCMD[19] = {
+  0xAA, // head
+  0xB4, // command id
+  0x06, // data byte 1
+  0x01, // data byte 2 (set mode)
+  0x00, // data byte 3 (sleep)
+  0x00, // data byte 4
+  0x00, // data byte 5
+  0x00, // data byte 6
+  0x00, // data byte 7
+  0x00, // data byte 8
+  0x00, // data byte 9
+  0x00, // data byte 10
+  0x00, // data byte 11
+  0x00, // data byte 12
+  0x00, // data byte 13
+  0xFF, // data byte 14 (device id byte 1)
+  0xFF, // data byte 15 (device id byte 2)
+  0x05, // checksum
+  0xAB  // tail
+};
 
 // pin on which a led is attached on the board
 
@@ -184,6 +207,24 @@ void writeData(String data){
   
 }
 
+void sleepSDS(){
+  Serial.println("Begin sleep......");
+  for (uint8_t i = 0; i < 19; i++) {
+    Serial.write(SLEEPCMD[i]);
+  }
+  Serial.flush();
+  while (Serial.available() > 0) {
+    Serial.read();
+  }
+  
+}
+
+void wakeUpSDS(){
+  Serial.println("Wake up........");
+  Serial.write(0x01);
+  Serial.flush();  
+}
+
 void setup(){
   Serial.begin(9600, SERIAL_8N1);
 
@@ -217,27 +258,6 @@ void setup(){
 
 }
 
-static const byte SLEEPCMD[19] = {
-  0xAA, // head
-  0xB4, // command id
-  0x06, // data byte 1
-  0x01, // data byte 2 (set mode)
-  0x00, // data byte 3 (sleep)
-  0x00, // data byte 4
-  0x00, // data byte 5
-  0x00, // data byte 6
-  0x00, // data byte 7
-  0x00, // data byte 8
-  0x00, // data byte 9
-  0x00, // data byte 10
-  0x00, // data byte 11
-  0x00, // data byte 12
-  0x00, // data byte 13
-  0xFF, // data byte 14 (device id byte 1)
-  0xFF, // data byte 15 (device id byte 2)
-  0x05, // checksum
-  0xAB  // tail
-};
 
 void loop(){
 
@@ -252,7 +272,7 @@ void loop(){
   int pm25Total = 0;
   int pm10Total = 0;
   
-  while (countTotal<10){
+  while (countTotal<30){
       ProcessSerialData();
       Display();
       pm25Total += Pm25;
@@ -270,5 +290,10 @@ void loop(){
   String dataToBeWritten = "PM2.5 : " + String(pm25Ave) + "   PM10 : " + String(pm10Ave);
 
   writeData(dataToBeWritten);
+
+  sleepSDS();
+  delay(10000);
+  wakeUpSDS();
+  delay(100);
 
 }
