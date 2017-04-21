@@ -16,6 +16,7 @@ int nbr_remaining;
 //the data file which data gets logged in
 File myFile;
 
+//sleep command to be written in the SDS011
 static const byte SLEEPCMD[19] = {
   0xAA, // head
   0xB4, // command id
@@ -38,7 +39,6 @@ static const byte SLEEPCMD[19] = {
   0xAB  // tail
 };
 
-// pin on which a led is attached on the board
 
 // interrupt raised by the watchdog firing
 // when the watchdog fires during sleep, this function will be executed
@@ -120,9 +120,9 @@ void Display()
    // displayTemp[i]=0; 
      //DisPm25data(Pm25);
      //DisPm10data(Pm10);
-     Serial.print("PM25 : ");
+     Serial.print("PM25 : " + String(float(Pm25)/10));
      Serial.print(Pm25);
-     Serial.print("       PM10 : ");
+     Serial.print("       PM10 : " + String(float(Pm10)/10));
      Serial.println(Pm10);
 }
 
@@ -252,8 +252,6 @@ void setup(){
   
   // configure the watchdog
   configure_wdt();
-
-
   
 
 }
@@ -262,12 +260,11 @@ void setup(){
 void loop(){
 
   // sleep for a given number of cycles (here, 5 * 8 seconds) in lowest power mode
-  //sleep(1);
+  //sleep(5);
 
   // usefull stuff should be done here before next long sleep
   // blink three times
-
-
+  
   int countTotal = 0;
   int pm25Total = 0;
   int pm10Total = 0;
@@ -275,25 +272,34 @@ void loop(){
   while (countTotal<30){
       ProcessSerialData();
       Display();
-      pm25Total += Pm25;
-      pm10Total += Pm10;
+
+      if (countTotal>=10){
+          pm25Total += Pm25;
+          pm10Total += Pm10;
+
+        }
+      
       delay(1000);
 
       if (!((Pm25 == 0) || (Pm10 == 0))){
-        countTotal++;
-        }
+           countTotal++;
+      }
     }
 
-  float pm25Ave = float(pm25Total)/(countTotal*10);
-  float pm10Ave = float(pm10Total)/(countTotal*10);
+  float pm25Ave = float(pm25Total)/((countTotal-10)*10);
+  float pm10Ave = float(pm10Total)/((countTotal-10)*10);
 
   String dataToBeWritten = "PM2.5 : " + String(pm25Ave) + "   PM10 : " + String(pm10Ave);
 
   writeData(dataToBeWritten);
 
   sleepSDS();
-  delay(10000);
+  delay(100);
+  sleep(5);
+  
   wakeUpSDS();
   delay(100);
+
+  
 
 }
