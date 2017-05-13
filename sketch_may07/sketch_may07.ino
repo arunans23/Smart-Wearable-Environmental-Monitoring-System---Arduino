@@ -184,7 +184,7 @@ void writeData(String data){
   // if the file opened okay, write to it:
   if (myFile) {
     Serial.println(data);
-    myFile.println("Data inserted : " +  data);
+    myFile.println(data);
     // close the file:
     myFile.close();
     Serial.println("done.");
@@ -298,7 +298,7 @@ void loop(){
   String date = rtc.getDateStr();
   String time = rtc.getTimeStr();
 
-  String dataToBeWritten = date + " -- " + time + "   " + "PM2.5 : " + String(pm25Ave) + "   PM10 : " + String(pm10Ave);
+  String dataToBeWritten = date + "--" + time + " " + String(pm25Ave) + " " + String(pm10Ave);
  
   writeData(dataToBeWritten);
 
