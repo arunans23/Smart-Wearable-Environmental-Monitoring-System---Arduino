@@ -11,3 +11,37 @@ Products needed.
 1. SDS011 PM2.5 sensor module
 2. Arduino Nano or Uno
 3. Arduino SD card module
+
+
+
+
+Pin configurations: (Module -- Arduino Nano)
+
+SDS011
+
+Rx   -- Tx
+Tx   -- Rx
+VCC  -- 5V
+GND  -- GND
+
+
+SD Card Module
+
+CS   -- D4
+SCK  -- D13
+MOSI -- D11
+MISO -- D12
+VCC  -- 5V
+GND  -- GND
+
+DS3231
+
+GND  -- GND
+VCC  -- 5V
+SDA  -- A4
+SCL  -- A5
+
+
+*/
+
+
